@@ -1,1 +1,39 @@
 ---
+global:
+  donate: 0.5
+  algos:
+    - test1
+  pools:
+    - pool1
+  wallets:
+    btc: abc123
+    pgn: pgn123
+    rvn: rva123
+
+server:
+  update_rates: 5
+
+agent:
+  name: agent01
+  server: 127.0.0.1
+  key: abc1234
+  profile: default
+
+custom_pools:
+  - name: poolexample1
+    stratos:
+    wallet:
+    worker_name:
+    worker_pass:
+    coin:
+
+profiles:
+  - name: default
+    algos:
+      - name: x16r
+        miner: ccminer
+      - name: x16s
+        miner: enemy-1.14
+    pools:
+      - zpool
+      - name

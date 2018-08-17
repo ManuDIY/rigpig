@@ -44,6 +44,7 @@ var remoteAgentService = make(chan string)
 var apiServerService = make(chan string)
 var webConsoleService = make(chan string)
 var TopAlgoUpdates = make(chan []internal.AlgoStats)
+var CurrencyRates = make(chan []internal.Currency)
 var gracefulStop = make(chan os.Signal)
 
 func (s *Server) Start() {
@@ -58,10 +59,14 @@ func (s *Server) Start() {
 	enabledServices := s.countEnabledServices()
 	log.Printf("Loading %d services", enabledServices)
 
-	s.wgServer.Add(enabledServices + 1)
+	s.wgServer.Add(enabledServices + 2)
 
 	go func() {
-		s.UpdateCryptoStats()
+		s.UpdateCurrencyRates()
+	}()
+
+	go func() {
+		s.UpdateCurrencyRates()
 	}()
 
 	if s.EnableRemoteAgents == true {
@@ -77,26 +82,26 @@ func (s *Server) Start() {
 		go s.console()
 	}
 
-	go func() {
-		sig := <-gracefulStop
-
-		log.Printf("\n==> RECEIVED SIGNAL: %s", sig)
-
-		AppCleanup()
-		os.Exit(0)
-	}()
-
 	for {
 		select {
 		case algoUpdates := <-TopAlgoUpdates:
 			internal.OutputAlgoStats = algoUpdates
 			break
+		case currencyRates := <-CurrencyRates:
+			internal.LatestCurrencyRates = currencyRates
+			break
+		case sig := <-gracefulStop:
+			gracefulExit(sig)
 		default:
 		}
 	}
 
 	s.wgServer.Wait()
+}
 
+func gracefulExit(sig os.Signal) {
+	log.Printf("Received signal: %s", sig)
+	os.Exit(0)
 }
 
 func (s *Server) UpdateCryptoStats() {
@@ -112,6 +117,16 @@ func (s *Server) UpdateCryptoStats() {
 		time.Sleep(sleepTime)
 	}
 
+}
+
+func (s *Server) UpdateCurrencyRates() {
+	defer s.wgServer.Done()
+	sleepTime := time.Minute * 60
+
+	for {
+		// fetch and store rates here
+		time.Sleep(sleepTime)
+	}
 }
 
 func (s *Server) countEnabledServices() (services int) {

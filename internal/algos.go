@@ -116,7 +116,7 @@ func UpdateAlgos() []AlgoStats {
 	combinedAlgos := findMostProfitable(pool_stats)
 
 	// Create a slice that will sort combinedAlgos by key
-	//log.Printf("Crunching and ordering by profitability...\n")
+	log.Printf("Crunching and ordering by profitability...\n")
 	var keys []float64
 	for k := range combinedAlgos {
 		keys = append(keys, k)
@@ -131,7 +131,7 @@ func UpdateAlgos() []AlgoStats {
 	}
 	TopAlgos = make([]AlgoStats, totalAlgos)
 
-	//log.Print("Building sorted list: sorting by most profitable first")
+	log.Print("Building sorted list: sorting by most profitable first")
 	listPosition := 0
 	for i := totalAlgos; i >= 1; i-- {
 		TopAlgos[listPosition] = combinedAlgos[keys[i]]
@@ -154,12 +154,12 @@ func fetchCombinedPools() (map[MiningPool]Algo, error) {
 
 	pool_stats := make(map[MiningPool]Algo, 500)
 
-	//log.Printf("Collection lastest crypto stats:")
+	log.Printf("Collection lastest crypto stats:")
 
 	// Iterate through all pools and
 	for k, p := range Pools {
 
-		// log.Printf("==> Hitting : %s", p.Name)
+		log.Printf("==> Hitting : %s", p.Name)
 
 		var algos Algo
 
@@ -195,7 +195,7 @@ func findMostProfitable(pool_stats map[MiningPool]Algo) (combinedAlgos map[float
 			vs := reflect.ValueOf(v.Field(i).Interface())
 			current24 := vs.FieldByName("ActualLast24h")
 
-			//fmt.Println(vs.FieldByName("Name").String(), current24.String())
+			log.Println(vs.FieldByName("Name").String(), current24.String())
 
 			if current24.String() != "" {
 				current24Float, err := strconv.ParseFloat(current24.String(), 64)
