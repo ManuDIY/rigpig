@@ -158,7 +158,7 @@ func (s *Server) NewRemoteAgentServer(remoteAgentService chan string) {
 
 	err := RAServer.Listen()
 	if err != nil {
-		log.Println("err")
+		log.Println(err)
 	}
 
 }
