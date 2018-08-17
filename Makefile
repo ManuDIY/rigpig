@@ -13,6 +13,7 @@ all: clean deps lint gofmt gotest build-darwin build-windows64 build-linux64 bui
 deps:
 	go get github.com/spf13/cobra
 	go get github.com/spf13/viper
+	go get github.com/gizak/termui
 
 clean:
 	rm -rf bin/*
