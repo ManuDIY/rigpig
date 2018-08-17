@@ -1,3 +1,5 @@
+[![Go Report Card](https://goreportcard.com/badge/github.com/serainville/rigpig)](https://goreportcard.com/report/github.com/serainville/rigpig) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/77f9cb5f1a5d4f089c8f4edd32216372)](https://www.codacy.com/project/serainville/rigpig/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=serainville/rigpig&amp;utm_campaign=Badge_Grade_Dashboard)
+
 # RIGPIG
 Rigpig is a single pool / multi-pool cryptocurrency miner. It also operates
 as an centralized remote rig manager.
