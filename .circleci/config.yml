@@ -25,4 +25,5 @@ jobs:
       # specify any bash command here prefixed with `run: `
       - run: go get github.com/spf13/cobra
       - run: go get github.com/spf13/viper
+      - run: go get github.com/gizak/termui
       - run: go test -v ./...
