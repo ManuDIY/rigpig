@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"log"
 	"net"
+	"rigpig/internal"
 	"time"
 )
 
@@ -31,7 +32,7 @@ func NewApiServer() *ApiServer {
 func (a *ApiServer) Listen() error {
 	ipAddr := a.Address + ":" + a.Port
 
-	log.Printf("Starting API Server on %s:%s", a.Address, a.Port)
+	log.Printf("API Server listening on %s:%s", a.Address, a.Port)
 
 	listener, err := net.Listen("tcp", ipAddr)
 	if err != nil {
@@ -43,7 +44,7 @@ func (a *ApiServer) Listen() error {
 		log.Println("API Server stopped")
 	}()
 
-	for {
+	for internal.NotDone {
 		a.Conn, err = listener.Accept()
 		if err != nil {
 			log.Println(err)

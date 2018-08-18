@@ -3,6 +3,7 @@ package console
 import (
 	"fmt"
 	ui "github.com/gizak/termui"
+	"os"
 	"rigpig/internal"
 	"rigpig/internal/common"
 	"strconv"
@@ -179,7 +180,14 @@ func MakeConsole(topAlgoStats <-chan []internal.AlgoStats) {
 
 	ui.Handle("/sys/kbd/q", func(ui.Event) {
 		ui.StopLoop()
+		ui.Close()
+		os.Exit(0)
 	})
+
+	//ui.Handle("/sys/kbd/C-x", func(ui.Event) {
+	//	log.Println("Existing console...")
+	//	ui.StopLoop()
+	//})
 
 	ui.Handle("/timer/1s", func(e ui.Event) {
 		t := e.Data.(ui.EvtTimer)

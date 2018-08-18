@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"log"
 	"net"
+	"rigpig/internal"
 	"time"
 )
 
@@ -43,7 +44,7 @@ func (r *RemoteAgentServer) Listen() error {
 		log.Println("API Server stopped")
 	}()
 
-	for {
+	for internal.NotDone {
 		r.Conn, err = listener.Accept()
 		if err != nil {
 			log.Println(err)

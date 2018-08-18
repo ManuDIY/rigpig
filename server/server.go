@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -21,6 +22,7 @@ const (
 )
 
 var TopAlgosResults []*internal.AlgoStats
+var NotDone = true
 
 type Server struct {
 	wgServer           sync.WaitGroup
@@ -59,7 +61,7 @@ func (s *Server) Start() {
 	enabledServices := s.countEnabledServices()
 	log.Printf("Loading %d services", enabledServices)
 
-	s.wgServer.Add(enabledServices + 2)
+	s.wgServer.Add(6)
 
 	go func() {
 		s.UpdateCurrencyRates()
@@ -79,24 +81,24 @@ func (s *Server) Start() {
 		go s.NewApiServer(apiServerService)
 	}
 	if s.EnableConsole == true {
-		go s.console()
+		s.console()
 	}
 
-	for {
-		select {
-		case algoUpdates := <-TopAlgoUpdates:
-			internal.OutputAlgoStats = algoUpdates
-			break
-		case currencyRates := <-CurrencyRates:
-			internal.LatestCurrencyRates = currencyRates
-			break
-		case sig := <-gracefulStop:
-			gracefulExit(sig)
-		default:
-		}
+	select {
+	case algoUpdates := <-TopAlgoUpdates:
+		internal.OutputAlgoStats = algoUpdates
+		break
+	case currencyRates := <-CurrencyRates:
+		internal.LatestCurrencyRates = currencyRates
+		break
+	case <-gracefulStop:
+		fmt.Println("EXITING NOW!!!!")
+		internal.NotDone = false
+	default:
 	}
 
 	s.wgServer.Wait()
+	os.Exit(0)
 }
 
 func gracefulExit(sig os.Signal) {
@@ -110,7 +112,7 @@ func (s *Server) UpdateCryptoStats() {
 	sleepTime := time.Minute * 5
 
 	//log.Print("Initializing Algo Updates")
-	for {
+	for internal.NotDone {
 		//log.Println("==> Getting latest algo stats...")
 		TopAlgoUpdates <- internal.UpdateAlgos()
 		//log.Printf("==> UpdateCryptoStats sleeping for %s...", sleepTime)
@@ -123,7 +125,7 @@ func (s *Server) UpdateCurrencyRates() {
 	defer s.wgServer.Done()
 	sleepTime := time.Minute * 60
 
-	for {
+	for internal.NotDone {
 		// fetch and store rates here
 		time.Sleep(sleepTime)
 	}
@@ -166,11 +168,10 @@ func (s *Server) NewRemoteAgentServer(remoteAgentService chan string) {
 func (s *Server) webConsole(webConsoleService chan string) {
 	defer s.wgServer.Done()
 
-	log.Println("Starting Web Console Server...")
-
 	APIServer := api.NewApiServer()
 	APIServer.Port = "3001"
 
+	log.Println("Starting Web Console Server...")
 	err := APIServer.Listen()
 	if err != nil {
 		log.Println(err)

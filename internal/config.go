@@ -4,6 +4,8 @@ import "github.com/spf13/viper"
 
 var Logfile = "rigpig.log"
 
+var NotDone = true
+
 func LoadConfig() (*viper.Viper, error) {
 	v := viper.New()
 
