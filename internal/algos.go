@@ -106,9 +106,10 @@ var Pools []MiningPool
 func UpdateAlgos() []AlgoStats {
 
 	// Split this out in the future. Put logic to enabled\disable pools
+	Pools = []MiningPool{}
 	Pools = append(Pools, MiningPool{Name: "ahashpool", URL: "https://www.ahashpool.com/api/status", DefaultUnits: "BTC", Enabled: true})
 	Pools = append(Pools, MiningPool{Name: "blazepool", URL: "http://api.blazepool.com/status", DefaultUnits: "BTC", Enabled: true})
-	//Pools = append(Pools, MiningPool{ Name: "hashrefinery",	URL: "http://pool.hashrefinery.com/api/status",	DefaultUnits: "BTC", Enabled: false})
+	Pools = append(Pools, MiningPool{Name: "hashrefinery",	URL: "http://pool.hashrefinery.com/api/status",	DefaultUnits: "BTC", Enabled: false})
 	Pools = append(Pools, MiningPool{Name: "zergpool", URL: "http://api.zergpool.com:8080/api/status", DefaultUnits: "BTC", Enabled: true})
 	Pools = append(Pools, MiningPool{Name: "zpool", URL: "http://www.zpool.ca/api/status", DefaultUnits: "BTC", Enabled: true})
 
@@ -165,17 +166,17 @@ func fetchCombinedPools() (map[MiningPool]Algo, error) {
 
 		resp, err := httpClient.Get(p.URL)
 		if err != nil {
-			return pool_stats, err
+			log.Printf("Error: %v", err)
 		}
 
 		bytes, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			return pool_stats, err
+			log.Printf("Error: %v", err)
 		}
 
 		err = json.Unmarshal(bytes, &algos)
 		if err != nil {
-			return pool_stats, err
+			log.Printf("Error: %v", err)
 		}
 		pool_stats[p] = algos
 
@@ -195,9 +196,8 @@ func findMostProfitable(pool_stats map[MiningPool]Algo) (combinedAlgos map[float
 			vs := reflect.ValueOf(v.Field(i).Interface())
 			current24 := vs.FieldByName("ActualLast24h")
 
-			log.Println(vs.FieldByName("Name").String(), current24.String())
-
-			if current24.String() != "" {
+			if len(current24.String()) > 0 {
+				//log.Println("Adding: ", vs.FieldByName("Poo"), vs.FieldByName("Name").String(), current24.String())
 				current24Float, err := strconv.ParseFloat(current24.String(), 64)
 				if err != nil {
 					log.Fatal(err, current24)

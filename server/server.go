@@ -22,7 +22,6 @@ const (
 )
 
 var TopAlgosResults []*internal.AlgoStats
-var NotDone = true
 
 type Server struct {
 	wgServer           sync.WaitGroup
@@ -61,14 +60,16 @@ func (s *Server) Start() {
 	enabledServices := s.countEnabledServices()
 	log.Printf("Loading %d services", enabledServices)
 
-	s.wgServer.Add(6)
+	s.wgServer.Add(enabledServices + 2)
 
 	go func() {
+		log.Print("Initializing currency updates")
 		s.UpdateCurrencyRates()
 	}()
 
 	go func() {
-		s.UpdateCurrencyRates()
+		log.Print("Initializing crypto updates")
+		s.UpdateCryptoStats()
 	}()
 
 	if s.EnableRemoteAgents == true {
@@ -81,24 +82,26 @@ func (s *Server) Start() {
 		go s.NewApiServer(apiServerService)
 	}
 	if s.EnableConsole == true {
-		s.console()
+		go s.console()
 	}
 
-	select {
-	case algoUpdates := <-TopAlgoUpdates:
-		internal.OutputAlgoStats = algoUpdates
-		break
-	case currencyRates := <-CurrencyRates:
-		internal.LatestCurrencyRates = currencyRates
-		break
-	case <-gracefulStop:
-		fmt.Println("EXITING NOW!!!!")
-		internal.NotDone = false
-	default:
+	for {
+		select {
+		case algoUpdates := <-TopAlgoUpdates:
+			internal.OutputAlgoStats = algoUpdates
+			break
+		case currencyRates := <-CurrencyRates:
+			internal.LatestCurrencyRates = currencyRates
+			break
+		case <-gracefulStop:
+			fmt.Println("EXITING NOW!!!!")
+			internal.NotDone = false
+		default:
+		}
+		time.Sleep(time.Second)
 	}
 
 	s.wgServer.Wait()
-	os.Exit(0)
 }
 
 func gracefulExit(sig os.Signal) {
@@ -112,7 +115,7 @@ func (s *Server) UpdateCryptoStats() {
 	sleepTime := time.Minute * 5
 
 	//log.Print("Initializing Algo Updates")
-	for internal.NotDone {
+	for  {
 		//log.Println("==> Getting latest algo stats...")
 		TopAlgoUpdates <- internal.UpdateAlgos()
 		//log.Printf("==> UpdateCryptoStats sleeping for %s...", sleepTime)

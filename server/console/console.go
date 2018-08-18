@@ -6,8 +6,8 @@ import (
 	"os"
 	"rigpig/internal"
 	"rigpig/internal/common"
-	"strconv"
 	"time"
+	"strconv"
 )
 
 var Agents []Agent
@@ -165,9 +165,6 @@ func MakeConsole(topAlgoStats <-chan []internal.AlgoStats) {
 	draw := func(t int) {
 		//lc.Data = sinps[t/2:]
 		coinsTable.Rows = CreateCoinDataTable()
-		coinsTable.FgColors[0] = ui.ColorCyan
-		coinsTable.Analysis()
-		coinsTable.SetSize()
 		coinsTable.BorderLabel = "20 MOST PROFITABLE ALGOS -- " + fmt.Sprintf("UPDATED: %02d:%02d:%02d", internal.Updated.Hour(), internal.Updated.Minute(), internal.Updated.Second())
 
 		poolStatus.Rows = CreatePoolStatusRows()
@@ -232,17 +229,29 @@ func CreatePoolStatusRows() [][]string {
 
 func CreateCoinDataTable() [][]string {
 
-	CoinData = internal.GetLatestAlgoStats()
+	CoinData = internal.OutputAlgoStats
 	coinsTableRows := [][]string{}
 	coinsTableRows = append(coinsTableRows, []string{"POS", "ALGO", "POOL", "PORT", "BTC ESTIMATE 24h", "BTC ACTUAL 24h", "POOL WORKERS"})
 
-	if len(CoinData) > 0 {
-		for i := 0; i <= 39; i++ {
+	/*
+
+	if len(internal.OutputAlgoStats) > 0 {
+		for algo := range internal.OutputAlgoStats {
+			coinsTableRows = append(coinsTableRows, []string{strconv.Itoa(algo), internal.OutputAlgoStats[algo].Name,
+				internal.OutputAlgoStats[algo].PoolName,
+				strconv.Itoa(internal.OutputAlgoStats[algo].Port),
+				internal.OutputAlgoStats[algo].EstimateLast24h,
+				internal.OutputAlgoStats[algo].ActualLast24h,
+				strconv.Itoa(internal.OutputAlgoStats[algo].Workers)})
+		}
+	}
+	*/
+	if len(CoinData) >= 20 {
+		for i := 0; i <= 19; i++ {
 			coinsTableRows = append(coinsTableRows, []string{strconv.Itoa(i + 1), CoinData[i].Name, CoinData[i].PoolName, strconv.Itoa(CoinData[i].Port), CoinData[i].EstimateLast24h, CoinData[i].ActualLast24h, strconv.Itoa(CoinData[i].Workers)})
 		}
 	} else {
-
-		for i := 0; i <= 39; i++ {
+		for i := 0; i <= 19; i++ {
 			coinsTableRows = append(coinsTableRows, []string{"", "", "", "", ""})
 		}
 
